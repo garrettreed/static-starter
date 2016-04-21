@@ -1,10 +1,5 @@
 'use strict';
 
-/**
- * TODO
- * 	- Add js hot swap
- */
-
 /*
  * Gulp plugins.
  */
