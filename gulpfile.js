@@ -19,15 +19,15 @@ const templatePaths = ['templates/**/*.mustache'];
 const partialPaths = ['partials/**/*.mustache'];
 const stylePaths = ['styles/**/*.scss'];
 const jsPaths = ['js/**/*.js', '!js/bundle.js'];
+
 const buildPath = './build';
-const viewPaths = [buildPath+'/*.html'];
 
 /**
  * Tasks
  */
 gulp.task('browser-sync', function() {
     browserSync.use(htmlInjector, {
-        files: viewPaths
+        files: `${buildPath}/*.html`
     });
     browserSync.init({
         server: {
@@ -45,8 +45,8 @@ gulp.task('sass', function() {
         .pipe(sourcemaps.init())
         .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
         .pipe(concat('bundle.css'))
-        .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest(buildPath+'/styles'))
+        .pipe(sourcemaps.write())
+        .pipe(gulp.dest(`${buildPath}/styles`))
         .pipe(browserSync.stream({match: '**/*.css'}));
 });
 
@@ -58,8 +58,8 @@ gulp.task('js', function() {
             compact: true
 		}))
         .pipe(concat('bundle.js'))
-        .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest(buildPath+'/js'));
+        .pipe(sourcemaps.write())
+        .pipe(gulp.dest(`${buildPath}/js`));
 });
 
 gulp.task('views', function() {
@@ -72,7 +72,7 @@ gulp.task('views', function() {
        .pipe(gulp.dest(buildPath));
 });
 
-gulp.task('default', ['sass', 'js', 'views', 'browser-sync'], function() {
+gulp.task('default', ['views', 'sass', 'js', 'browser-sync'], function() {
     gulp.watch(jsPaths, ['reload']);
     gulp.watch(stylePaths, ['sass']);
     gulp.watch(jsPaths, ['js']);
