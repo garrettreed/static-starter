@@ -11,14 +11,17 @@ const concat = require('gulp-concat');
 const sourcemaps = require('gulp-sourcemaps');
 const babel = require('gulp-babel');
 const mustache = require('gulp-mustache');
+const imagemin = require('gulp-imagemin');
+const pngquant = require('imagemin-pngquant');
 
 /**
- * Paths and options
+ * Paths
  */
 const templatePaths = ['templates/**/*.mustache'];
 const partialPaths = ['partials/**/*.mustache'];
 const stylePaths = ['styles/**/*.scss'];
 const jsPaths = ['js/**/*.js', '!js/bundle.js'];
+const imgPaths = ['**/*.jpg', '**/*.png', '**/*.gif', 'build/**/*.min.*'];
 
 const buildPath = './build';
 
@@ -70,6 +73,19 @@ gulp.task('views', function() {
            {}
        ))
        .pipe(gulp.dest(buildPath));
+});
+
+gulp.task('img', function() {
+    return gulp.src(imgPaths)
+        .pipe(imagemin({
+            progressive: true,
+            svgoPlugins: [
+                {removeViewBox: false},
+                {cleanupIDs: false}
+            ],
+            use: [pngquant()]
+        }))
+        .pipe(gulp.dest(buildPath));
 });
 
 gulp.task('default', ['views', 'sass', 'js', 'browser-sync'], function() {
