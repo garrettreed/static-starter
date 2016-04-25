@@ -2,8 +2,9 @@
   "name": "html5-gulp-sass-es6-template",
   "version": "1.0.0",
   "description": "Template for static web app",
-  "main": "index.js",
+  "main": "gulp",
   "scripts": {
+    "start": "gulp",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "garrettreed",
@@ -18,11 +19,8 @@
     "gulp-concat": "^2.6.0",
     "gulp-imagemin": "^2.4.0",
     "gulp-mustache": "^2.2.0",
-    "gulp-plumber": "^1.0.2",
     "gulp-sass": "^2.1.1",
     "gulp-sourcemaps": "^1.6.0",
-    "gulp-uglify": "^1.5.3",
-    "gulp-util": "^3.0.7",
     "imagemin-pngquant": "^4.2.2"
   }
 }
