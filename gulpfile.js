@@ -10,14 +10,17 @@ const sass = require('gulp-sass');
 const concat = require('gulp-concat');
 const sourcemaps = require('gulp-sourcemaps');
 const babel = require('gulp-babel');
+const mustache = require('gulp-mustache');
 
 /**
  * Paths and options
  */
-const viewPaths = ['**/*.html'];
+const templatePaths = ['templates/**/*.mustache'];
+const partialPaths = ['partials/**/*.mustache'];
 const stylePaths = ['styles/**/*.scss'];
-const jsPaths = ['js/**/*.js',
-                 '!js/bundle.js'];
+const jsPaths = ['js/**/*.js', '!js/bundle.js'];
+const buildPath = './build';
+const viewPaths = [buildPath+'/*.html'];
 
 /**
  * Tasks
@@ -28,7 +31,7 @@ gulp.task('browser-sync', function() {
     });
     browserSync.init({
         server: {
-            baseDir: "./"
+            baseDir: buildPath
         }
     });
  });
@@ -43,7 +46,7 @@ gulp.task('sass', function() {
         .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
         .pipe(concat('bundle.css'))
         .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest('styles'))
+        .pipe(gulp.dest(buildPath+'/styles'))
         .pipe(browserSync.stream({match: '**/*.css'}));
 });
 
@@ -56,13 +59,24 @@ gulp.task('js', function() {
 		}))
         .pipe(concat('bundle.js'))
         .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest('js'));
+        .pipe(gulp.dest(buildPath+'/js'));
 });
 
-gulp.task('default', ['browser-sync', 'sass', 'js'], function() {
-    gulp.watch([jsPaths], ['reload']);
+gulp.task('views', function() {
+    return gulp.src("./templates/*.mustache")
+	   .pipe(mustache(
+           {},
+           {extension: '.html'},
+           {}
+       ))
+       .pipe(gulp.dest(buildPath));
+});
+
+gulp.task('default', ['sass', 'js', 'views', 'browser-sync'], function() {
+    gulp.watch(jsPaths, ['reload']);
     gulp.watch(stylePaths, ['sass']);
     gulp.watch(jsPaths, ['js']);
+    gulp.watch([partialPaths, templatePaths], ['views']);
 });
 
-gulp.task('build', ['js', 'sass']);
+gulp.task('build', ['views', 'js', 'sass']);
