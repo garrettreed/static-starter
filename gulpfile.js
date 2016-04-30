@@ -28,7 +28,7 @@ const buildPath = './build';
 /**
  * Tasks
  */
-gulp.task('browser-sync', function() {
+gulp.task('browser-sync', () => {
     browserSync.use(htmlInjector, {
         files: `${buildPath}/*.html`
     });
@@ -39,11 +39,11 @@ gulp.task('browser-sync', function() {
     });
  });
 
-gulp.task('reload', function() {
+gulp.task('reload', () => {
     browserSync.reload();
 });
 
-gulp.task('sass', function() {
+gulp.task('sass', () => {
     return gulp.src(stylePaths)
         .pipe(sourcemaps.init())
         .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
@@ -53,7 +53,7 @@ gulp.task('sass', function() {
         .pipe(browserSync.stream({match: '**/*.css'}));
 });
 
-gulp.task('js', function() {
+gulp.task('js', () => {
     return gulp.src(jsPaths)
         .pipe(sourcemaps.init())
         .pipe(babel({
@@ -65,7 +65,7 @@ gulp.task('js', function() {
         .pipe(gulp.dest(`${buildPath}/js`));
 });
 
-gulp.task('views', function() {
+gulp.task('views', () => {
     return gulp.src("./templates/*.mustache")
 	   .pipe(mustache(
            {},
@@ -75,7 +75,7 @@ gulp.task('views', function() {
        .pipe(gulp.dest(buildPath));
 });
 
-gulp.task('img', function() {
+gulp.task('img', () => {
     return gulp.src(imgPaths)
         .pipe(imagemin({
             progressive: true,
@@ -88,7 +88,7 @@ gulp.task('img', function() {
         .pipe(gulp.dest(buildPath));
 });
 
-gulp.task('default', ['views', 'sass', 'js', 'browser-sync'], function() {
+gulp.task('default', ['views', 'sass', 'js', 'browser-sync'], () => {
     gulp.watch(jsPaths, ['reload']);
     gulp.watch(stylePaths, ['sass']);
     gulp.watch(jsPaths, ['js']);
