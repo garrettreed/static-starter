@@ -1,98 +1,87 @@
-'use strict';
+require("dotenv").config();
+const gulp = require("gulp");
+const browserSync = require("browser-sync").create();
+const sass = require("gulp-sass");
+const babel = require("gulp-babel");
+const uglify = require("gulp-uglify");
+const sourcemaps = require("gulp-sourcemaps");
+const autoprefixer = require("gulp-autoprefixer");
+const mustache = require("gulp-mustache");
+const concat = require("gulp-concat");
+const gulpif = require("gulp-if");
 
-/*
- * Gulp plugins.
- */
-const gulp = require('gulp');
-const browserSync = require('browser-sync').create();
-const htmlInjector = require("bs-html-injector");
-const sass = require('gulp-sass');
-const concat = require('gulp-concat');
-const sourcemaps = require('gulp-sourcemaps');
-const babel = require('gulp-babel');
-const mustache = require('gulp-mustache');
-const imagemin = require('gulp-imagemin');
-const pngquant = require('imagemin-pngquant');
+const isProdEnv = process.env.ENVIRONMENT === "production";
+console.log(`Building for ${process.env.ENVIRONMENT}`);
 
-/**
- * Paths
- */
-const templatePaths = ['templates/**/*.mustache'];
-const partialPaths = ['partials/**/*.mustache'];
-const stylePaths = ['styles/**/*.scss'];
-const jsPaths = ['js/**/*.js', '!js/bundle.js'];
-const imgPaths = ['**/*.jpg', '**/*.png', '**/*.gif', 'build/**/*.min.*'];
+const paths = {
+    styles: {
+        src: ["libs/**/*.css", "styles/**/*.scss"],
+        dest: "public/dist/"
+    },
+    scripts: {
+        src: ["libs/**/*.js", "js/**/*.js"],
+        dest: "public/dist/"
+    },
+    templates: {
+        src: ["templates/**/*.mustache", "!templates/partials/**"],
+        dest: "public/"
+    }
+};
 
-const buildPath = './build';
+function styles() {
+    return gulp
+        .src(paths.styles.src)
+        .pipe(sourcemaps.init())
+        .pipe(sass({ outputStyle: "compressed" }).on("error", sass.logError))
+        .pipe(autoprefixer())
+        .pipe(concat("dist.css"))
+        .pipe(gulpif(!isProdEnv, sourcemaps.write(".")))
+        .pipe(gulp.dest(paths.styles.dest))
+        .pipe(browserSync.stream({ match: "**/*.css" }));
+}
 
-/**
- * Tasks
- */
-gulp.task('browser-sync', () => {
-    browserSync.use(htmlInjector, {
-        files: `${buildPath}/*.html`
-    });
+function scripts() {
+    return gulp
+        .src(paths.scripts.src)
+        .pipe(sourcemaps.init({ loadMaps: true }))
+        .pipe(concat("dist.js"))
+        .pipe(babel({ presets: ["@babel/preset-env"] }))
+        .pipe(uglify())
+        .on("error", swallowError)
+        .pipe(gulpif(!isProdEnv, sourcemaps.write(".")))
+        .pipe(gulp.dest(paths.scripts.dest));
+}
+
+function templates() {
+    return gulp
+        .src(paths.templates.src)
+        .pipe(mustache("data.json", { extension: ".html" }, {}))
+        .pipe(gulp.dest(paths.templates.dest));
+}
+
+function watch() {
+    gulp.watch(paths.scripts.src, scripts).on("change", browserSync.reload);
+    gulp.watch(paths.styles.src, styles);
+    gulp.watch(paths.templates.src, templates).on("change", browserSync.reload);
+}
+
+function swallowError(error) {
+    console.log(error.toString());
+    this.emit("end");
+}
+
+function serve() {
     browserSync.init({
-        server: {
-            baseDir: buildPath
-        }
+        server: "public"
     });
- });
+    watch();
+}
 
-gulp.task('reload', () => {
-    browserSync.reload();
-});
+const build = gulp.parallel(styles, scripts, templates);
 
-gulp.task('sass', () => {
-    return gulp.src(stylePaths)
-        .pipe(sourcemaps.init())
-        .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
-        .pipe(concat('bundle.css'))
-        .pipe(sourcemaps.write())
-        .pipe(gulp.dest(`${buildPath}/styles`))
-        .pipe(browserSync.stream({match: '**/*.css'}));
-});
-
-gulp.task('js', () => {
-    return gulp.src(jsPaths)
-        .pipe(sourcemaps.init())
-        .pipe(babel({
-    		presets: ['es2015'],
-            compact: true
-		}))
-        .pipe(concat('bundle.js'))
-        .pipe(sourcemaps.write())
-        .pipe(gulp.dest(`${buildPath}/js`));
-});
-
-gulp.task('views', () => {
-    return gulp.src("./templates/*.mustache")
-	   .pipe(mustache(
-           {},
-           {extension: '.html'},
-           {}
-       ))
-       .pipe(gulp.dest(buildPath));
-});
-
-gulp.task('img', () => {
-    return gulp.src(imgPaths)
-        .pipe(imagemin({
-            progressive: true,
-            svgoPlugins: [
-                {removeViewBox: false},
-                {cleanupIDs: false}
-            ],
-            use: [pngquant()]
-        }))
-        .pipe(gulp.dest(buildPath));
-});
-
-gulp.task('default', ['views', 'sass', 'js', 'browser-sync'], () => {
-    gulp.watch(jsPaths, ['reload']);
-    gulp.watch(stylePaths, ['sass']);
-    gulp.watch(jsPaths, ['js']);
-    gulp.watch([partialPaths, templatePaths], ['views']);
-});
-
-gulp.task('build', ['views', 'js', 'sass']);
+exports.styles = styles;
+exports.scripts = scripts;
+exports.templates = templates;
+exports.watch = watch;
+exports.build = build;
+exports.default = gulp.series(build, serve);

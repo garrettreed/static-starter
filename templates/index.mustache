@@ -1,29 +1,29 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-
-    <title>The HTML5 Template</title>
-    <meta name="description" content="The HTML5 Template">
-    <meta name="author" content="Garrett Reed">
-
-    <!--[if lt IE 9]>
-    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-
-    <link rel="stylesheet" type="text/css" href="styles/bundle.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>This is a template</title>
+    <meta name="description" content="This is a template">
+    <link rel="stylesheet" href="styles/bundle.css">
 </head>
 <body>
     <h1>This should be red.</h1>
 
-    {{> ../partials/part }}
+    {{> partials/part }}
 
     <img src="img/Rick-and-Morty1.jpg" alt="Rick and Morty" width="100px" />
-    
+
+    <ul>
+    {{#dogs}}
+        <li>{{.}}</li>
+    {{/dogs}}
+    </ul>
+
     <h2>There should be a js-created element at the bottom of the page</h2>
 
-    <script src="js/bundle.js"></script>
+    <script src="dist/dist.js"></script>
 </body>
 
 </html>
