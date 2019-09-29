@@ -23,7 +23,7 @@ const paths = {
         dest: "public/dist/"
     },
     templates: {
-        src: ["templates/**/*.mustache", "!templates/partials/**"],
+        src: ["templates/**/*.mustache", "templates/**/*.html", "!templates/partials/**"],
         dest: "public/"
     }
 };
