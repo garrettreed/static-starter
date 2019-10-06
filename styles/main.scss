@@ -1,8 +1,18 @@
 @import "reset";
 
 body {
-    margin: 25px 50px;
+    min-height: 100vh;
+    scroll-behavior: smooth;
 }
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-play-state: paused !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+}
+
 
 h1 {
     color: red;
